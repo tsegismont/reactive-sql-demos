@@ -2,7 +2,6 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -11,12 +10,11 @@ import io.vertx.jdbcclient.JDBCConnectOptions;
 import io.vertx.jdbcclient.JDBCPool;
 import io.vertx.sqlclient.PoolOptions;
 import io.vertx.sqlclient.Tuple;
+import io.vertx.sqlclient.templates.SqlTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigDecimal;
-
-import static java.util.Objects.requireNonNull;
+import java.util.Map;
 
 public class ApiVerticle extends AbstractVerticle {
 
@@ -61,65 +59,48 @@ public class ApiVerticle extends AbstractVerticle {
   private Future<JsonArray> listProducts() {
     LOG.info("listProducts");
 
-    var execute = pgPool.query("SELECT * FROM Product")
-      .execute();
-
-    return execute
+    return pgPool.query("SELECT JSON_AGG(p) FROM Product p").execute()
       .map(rowset -> {
-        var data = new JsonArray();
-        for (var row : rowset) {
-          data.add(row.toJson());
-        }
-        return data;
-      })
-      .otherwise(new JsonArray());
+        var products = rowset.iterator().next().getJsonArray(0);
+        return products != null ? products : new JsonArray();
+      });
   }
 
-  private Future<JsonObject> createProduct(RoutingContext rc) {
+  private Future<Product> createProduct(RoutingContext rc) {
     LOG.info("createProduct");
 
-    var json = rc.body().asJsonObject();
-    String name;
-    BigDecimal price;
+    var product = rc.body().asPojo(Product.class);
 
-    try {
-      requireNonNull(json, "The incoming JSON document cannot be null");
-      name = requireNonNull(json.getString("name"), "The product name cannot be null");
-      price = new BigDecimal(json.getString("price"));
-    } catch (Throwable err) {
-      LOG.error("Could not extract values", err);
-      return Future.failedFuture(err);
+    var problems = Product.validate(product);
+    if (!problems.isEmpty()) {
+      return Future.failedFuture(problems.toString());
     }
 
     return pgPool.preparedQuery("INSERT INTO Product(name, price) VALUES (?, ?)")
-      .execute(Tuple.of(name, price))
+      .execute(Tuple.of(product.getName(), product.getPrice()))
       .map(rowSet -> {
-        var row = rowSet.property(JDBCPool.GENERATED_KEYS);
-        return new JsonObject()
-          .put("id", row.getInteger("id"))
-          .put("name", name)
-          .put("price", price);
-      })
-      .onFailure(err -> LOG.error("Woops", err));
+        var keys = rowSet.property(JDBCPool.GENERATED_KEYS);
+        product.setId(keys.getLong("id"));
+        return product;
+      });
   }
 
-  private Future<JsonObject> getProduct(RoutingContext rc) {
+  private Future<Product> getProduct(RoutingContext rc) {
     LOG.info("getProduct");
+
     var id = Long.valueOf(rc.pathParam("id"));
 
-    return pgPool
-      .preparedQuery("SELECT * FROM Product WHERE id=?")
-      .execute(Tuple.of(id))
+    return SqlTemplate.forQuery(pgPool, "SELECT * FROM Product WHERE id=#{id}")
+      .mapTo(Product.class)
+      .execute(Map.of("id", id))
       .map(rows -> {
         var iterator = rows.iterator();
         if (iterator.hasNext()) {
-          return iterator.next().toJson();
+          return iterator.next();
         } else {
-          return new JsonObject();
+          return null;
         }
-      })
-      .onFailure(err -> LOG.error("Woops", err));
+      });
   }
-
 }
 
