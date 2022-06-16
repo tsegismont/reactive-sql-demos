@@ -15,7 +15,6 @@
   <properties>
     <slf4j.version>1.7.36</slf4j.version>
     <logback-classic.version>1.2.11</logback-classic.version>
-    <vertx.version>4.3.1</vertx.version>
     <jackson-databind.version>2.13.3</jackson-databind.version>
     <testcontainers.version>1.17.2</testcontainers.version>
   </properties>
