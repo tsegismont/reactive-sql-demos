@@ -22,7 +22,7 @@ public class JDBCVerticle extends ApiVerticle {
     var connectOptions = new JDBCConnectOptions()
       .setJdbcUrl(String.format("jdbc:postgresql://%s:%s/%s", host, port, Constants.PG_DATABASE))
       .setUser(Constants.PG_USER)
-      .setPassword("vertx-in-action");
+      .setPassword(Constants.PG_PASSWORD);
 
     var poolOptions = new PoolOptions().setMaxSize(5);
 
