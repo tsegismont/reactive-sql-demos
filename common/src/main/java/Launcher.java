@@ -9,21 +9,28 @@ import org.testcontainers.containers.GenericContainer;
 
 import java.util.logging.Level;
 
-public class Main {
+public class Launcher {
 
-  private static final Logger LOG = LoggerFactory.getLogger(Main.class);
-
-  public static void main(String[] args) {
-
+  static {
     SLF4JBridgeHandler.removeHandlersForRootLogger();
     SLF4JBridgeHandler.install();
     java.util.logging.Logger.getLogger("").setLevel(Level.FINEST);
+  }
 
+  private static final Logger LOG = LoggerFactory.getLogger(Launcher.class);
+
+  private final ApiVerticle apiVerticle;
+
+  public Launcher(ApiVerticle apiVerticle) {
+    this.apiVerticle = apiVerticle;
+  }
+
+  public void run() {
     LOG.info("🚀 Starting a PostgreSQL container");
 
     var postgreSQLContainer = new GenericContainer<>("postgres:14.3-alpine")
       .withExposedPorts(5432)
-      .withEnv("POSTGRES_PASSWORD", "vertx-in-action")
+      .withEnv("POSTGRES_PASSWORD", Constants.PG_PASSWORD)
       .withClasspathResourceMapping("init.sql", "/docker-entrypoint-initdb.d/init.sql", BindMode.READ_ONLY);
 
     postgreSQLContainer.start();
@@ -36,7 +43,7 @@ public class Main {
       .put("pgHost", postgreSQLContainer.getHost())
       .put("pgPort", postgreSQLContainer.getMappedPort(5432)));
 
-    vertx.deployVerticle(new ApiVerticle(), options).onComplete(ar -> {
+    vertx.deployVerticle(apiVerticle, options).onComplete(ar -> {
       if (ar.succeeded()) {
 
         LOG.info("✅ ApiVerticle was deployed successfully");

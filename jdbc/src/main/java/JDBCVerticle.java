@@ -1,11 +1,6 @@
-import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
-import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.BodyHandler;
-import io.vertx.ext.web.handler.ErrorHandler;
 import io.vertx.jdbcclient.JDBCConnectOptions;
 import io.vertx.jdbcclient.JDBCPool;
 import io.vertx.sqlclient.PoolOptions;
@@ -16,47 +11,26 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-public class ApiVerticle extends AbstractVerticle {
+public class JDBCVerticle extends ApiVerticle {
 
-  private static final Logger LOG = LoggerFactory.getLogger(ApiVerticle.class);
+  private static final Logger LOG = LoggerFactory.getLogger(JDBCVerticle.class);
 
   private JDBCPool pgPool;
 
   @Override
-  public void start(Promise<Void> startPromise) throws Exception {
-    var host = config().getString("pgHost", "localhost");
-    int port = config().getInteger("pgPort", 5432);
-
+  protected void initPool(String host, int port) {
     var connectOptions = new JDBCConnectOptions()
-      .setJdbcUrl(String.format("jdbc:postgresql://%s:%s/postgres", host, port))
-      .setUser("postgres")
+      .setJdbcUrl(String.format("jdbc:postgresql://%s:%s/%s", host, port, Constants.PG_DATABASE))
+      .setUser(Constants.PG_USER)
       .setPassword("vertx-in-action");
 
     var poolOptions = new PoolOptions().setMaxSize(5);
 
     pgPool = JDBCPool.pool(vertx, connectOptions, poolOptions);
-
-    var router = Router.router(vertx);
-
-    var bodyHandler = BodyHandler.create();
-    router.post().handler(bodyHandler);
-
-    router.get("/products").respond(rc -> listProducts());
-    router.get("/products/:id").respond(this::getProduct);
-    router.post("/products").respond(this::createProduct);
-    router.route().failureHandler(ErrorHandler.create(vertx, true));
-
-    var future = vertx.createHttpServer()
-      .requestHandler(router)
-      .listen(8080);
-
-    future
-      .<Void>mapEmpty()
-      .onSuccess(__ -> LOG.info("HTTP server listening on port 8080"))
-      .onComplete(startPromise);
   }
 
-  private Future<JsonArray> listProducts() {
+  @Override
+  protected Future<JsonArray> listProducts(RoutingContext rc) {
     LOG.info("listProducts");
 
     return pgPool.query("SELECT JSON_AGG(p) FROM Product p").execute()
@@ -66,7 +40,8 @@ public class ApiVerticle extends AbstractVerticle {
       });
   }
 
-  private Future<Product> createProduct(RoutingContext rc) {
+  @Override
+  protected Future<Product> createProduct(RoutingContext rc) {
     LOG.info("createProduct");
 
     var product = rc.body().asPojo(Product.class);
@@ -85,7 +60,8 @@ public class ApiVerticle extends AbstractVerticle {
       });
   }
 
-  private Future<Product> getProduct(RoutingContext rc) {
+  @Override
+  protected Future<Product> getProduct(RoutingContext rc) {
     LOG.info("getProduct");
 
     var id = Long.valueOf(rc.pathParam("id"));
@@ -102,5 +78,9 @@ public class ApiVerticle extends AbstractVerticle {
         }
       });
   }
-}
 
+  public static void main(String[] args) {
+    Launcher launcher = new Launcher(new JDBCVerticle());
+    launcher.run();
+  }
+}

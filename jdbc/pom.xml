@@ -13,8 +13,8 @@
   <artifactId>jdbc</artifactId>
 
   <properties>
-    <agroal.version>2.0</agroal.version>
     <postgresql-jdbc.version>42.4.0</postgresql-jdbc.version>
+    <agroal.version>2.0</agroal.version>
   </properties>
 
   <dependencyManagement>
@@ -31,8 +31,9 @@
 
   <dependencies>
     <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-web</artifactId>
+      <groupId>org.example</groupId>
+      <artifactId>common</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -45,38 +46,14 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>io.agroal</groupId>
-      <artifactId>agroal-pool</artifactId>
-      <version>${agroal.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>jul-to-slf4j</artifactId>
-      <version>1.7.36</version>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-sql-client-templates</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <version>${postgresql-jdbc.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>testcontainers</artifactId>
-      <version>${testcontainers.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>${jackson-databind.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <version>${logback-classic.version}</version>
+      <groupId>io.agroal</groupId>
+      <artifactId>agroal-pool</artifactId>
+      <version>${agroal.version}</version>
     </dependency>
   </dependencies>
 
