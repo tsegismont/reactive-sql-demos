@@ -1,4 +1,5 @@
 import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
@@ -19,9 +20,9 @@ public class Launcher {
 
   private static final Logger LOG = LoggerFactory.getLogger(Launcher.class);
 
-  private final ApiVerticle apiVerticle;
+  private final Verticle apiVerticle;
 
-  public Launcher(ApiVerticle apiVerticle) {
+  public Launcher(Verticle apiVerticle) {
     this.apiVerticle = apiVerticle;
   }
 
@@ -29,7 +30,7 @@ public class Launcher {
     LOG.info("🚀 Starting a PostgreSQL container");
 
     var postgreSQLContainer = new GenericContainer<>("postgres:14.3-alpine")
-      .withExposedPorts(5432)
+      .withExposedPorts(Constants.PG_PORT)
       .withEnv("POSTGRES_PASSWORD", Constants.PG_PASSWORD)
       .withClasspathResourceMapping("init.sql", "/docker-entrypoint-initdb.d/init.sql", BindMode.READ_ONLY);
 
@@ -41,7 +42,7 @@ public class Launcher {
 
     var options = new DeploymentOptions().setConfig(new JsonObject()
       .put("pgHost", postgreSQLContainer.getHost())
-      .put("pgPort", postgreSQLContainer.getMappedPort(5432)));
+      .put("pgPort", postgreSQLContainer.getMappedPort(Constants.PG_PORT)));
 
     vertx.deployVerticle(apiVerticle, options).onComplete(ar -> {
       if (ar.succeeded()) {
