@@ -46,7 +46,7 @@ public class PgClientVerticle extends ApiVerticle {
   protected Future<Product> createProduct(RoutingContext rc) {
     LOG.info("createProduct");
 
-    var product = rc.body().asPojo(Product.class);
+    var product = rc.getBodyAsJson().mapTo(Product.class);
 
     var problems = Product.validate(product);
     if (!problems.isEmpty()) {
