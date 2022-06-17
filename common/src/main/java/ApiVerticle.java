@@ -36,7 +36,7 @@ public abstract class ApiVerticle extends AbstractVerticle {
 
     future
       .<Void>mapEmpty()
-      .onSuccess(server -> LOG.info("HTTP server listening on port 8080"))
+      .onSuccess(__ -> LOG.info("HTTP server listening on port 8080"))
       .onComplete(startPromise);
   }
 
