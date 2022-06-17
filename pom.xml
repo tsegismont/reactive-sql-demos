@@ -37,6 +37,7 @@
     <module>common</module>
     <module>jdbc</module>
     <module>reactive-pg</module>
+    <module>hibernate-reactive</module>
   </modules>
 
 </project>
