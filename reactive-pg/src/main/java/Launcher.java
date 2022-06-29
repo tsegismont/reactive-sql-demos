@@ -1,29 +1,19 @@
 import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 
-import java.util.logging.Level;
-
 public class Launcher {
-
-  static {
-    SLF4JBridgeHandler.removeHandlersForRootLogger();
-    SLF4JBridgeHandler.install();
-    java.util.logging.Logger.getLogger("").setLevel(Level.FINEST);
-  }
 
   private static final Logger LOG = LoggerFactory.getLogger(Launcher.class);
 
-  private final Verticle apiVerticle;
+  private final ServerWithPgClient serverWithPgClient;
 
-  public Launcher(Verticle apiVerticle) {
-    this.apiVerticle = apiVerticle;
+  public Launcher(ServerWithPgClient serverWithPgClient) {
+    this.serverWithPgClient = serverWithPgClient;
   }
 
   public void run() {
@@ -44,12 +34,11 @@ public class Launcher {
       .put("pgHost", postgreSQLContainer.getHost())
       .put("pgPort", postgreSQLContainer.getMappedPort(Constants.PG_PORT)));
 
-    vertx.deployVerticle(apiVerticle, options).onComplete(ar -> {
+    vertx.deployVerticle(serverWithPgClient, options).onComplete(ar -> {
       if (ar.succeeded()) {
-
-        LOG.info("✅ ApiVerticle was deployed successfully");
+        LOG.info("✅ ServerWithPgClient was deployed successfully");
       } else {
-        LOG.error("🔥 ApiVerticle deployment failed", ar.cause());
+        LOG.error("🔥 ServerWithPgClient deployment failed", ar.cause());
       }
     });
   }

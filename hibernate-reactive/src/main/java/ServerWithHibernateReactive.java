@@ -13,9 +13,9 @@ import javax.persistence.Persistence;
 import java.util.List;
 import java.util.Map;
 
-public class HibernateReactiveVerticle extends AbstractVerticle {
+public class ServerWithHibernateReactive extends AbstractVerticle {
 
-  private static final Logger LOG = LoggerFactory.getLogger(HibernateReactiveVerticle.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ServerWithHibernateReactive.class);
 
   private Mutiny.SessionFactory emf;
 
@@ -45,7 +45,7 @@ public class HibernateReactiveVerticle extends AbstractVerticle {
       .onItem().invoke(() -> LOG.info("HTTP server listening on port 8080"));
   }
 
-  protected Uni<Void> initHibernate(String host, int port) {
+  private Uni<Void> initHibernate(String host, int port) {
     return Uni.createFrom().deferred(() -> {
       var props = Map.of(
         "javax.persistence.jdbc.url", String.format("jdbc:postgresql://%s:%s/%s", host, port, Constants.PG_DATABASE),
@@ -93,7 +93,7 @@ public class HibernateReactiveVerticle extends AbstractVerticle {
   }
 
   public static void main(String[] args) {
-    Launcher launcher = new Launcher(new HibernateReactiveVerticle());
+    Launcher launcher = new Launcher(new ServerWithHibernateReactive());
     launcher.run();
   }
 }

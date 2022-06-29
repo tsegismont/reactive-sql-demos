@@ -8,11 +8,8 @@
 
   <logger name="io.netty" level="WARN"/>
   <logger name="io.vertx" level="INFO"/>
-  <logger name="org.hibernate" level="INFO"/>
-  <logger name="org.jboss.logging" level="INFO"/>
   <logger name="org.testcontainers" level="WARN"/>
   <logger name="com.github.dockerjava" level="WARN"/>
-  <logger name="org.postgresql" level="TRACE"/>
 
   <root level="INFO">
     <appender-ref ref="STDOUT"/>
