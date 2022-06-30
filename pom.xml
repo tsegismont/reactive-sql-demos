@@ -15,6 +15,9 @@
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+    <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
+    <vertx-maven-plugin.version>1.0.28</vertx-maven-plugin.version>
+
     <logback-classic.version>1.2.11</logback-classic.version>
     <jackson-databind.version>2.13.3</jackson-databind.version>
     <testcontainers.version>1.17.2</testcontainers.version>
@@ -27,9 +30,26 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.10.1</version>
+          <version>${maven-compiler-plugin.version}</version>
           <configuration>
             <release>${maven.compiler.source}</release>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>io.reactiverse</groupId>
+          <artifactId>vertx-maven-plugin</artifactId>
+          <version>${vertx-maven-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>vmp</id>
+              <goals>
+                <goal>initialize</goal>
+                <goal>package</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <redeploy>true</redeploy>
           </configuration>
         </plugin>
       </plugins>

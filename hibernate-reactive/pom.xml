@@ -13,6 +13,9 @@
   <artifactId>hibernate-reactive</artifactId>
 
   <properties>
+    <vertx.verticle>ServerWithHibernateReactive</vertx.verticle>
+    <vertx.launcher>${vertx.verticle}</vertx.launcher>
+
     <hibernate-reactive.version>1.1.6.Final</hibernate-reactive.version>
     <mutiny-vertx.version>2.22.0</mutiny-vertx.version>
   </properties>
@@ -65,5 +68,15 @@
       <version>2.1</version>
     </dependency>
   </dependencies>
+
+  <build>
+    <finalName>server-with-${project.artifactId}</finalName>
+    <plugins>
+      <plugin>
+        <groupId>io.reactiverse</groupId>
+        <artifactId>vertx-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>

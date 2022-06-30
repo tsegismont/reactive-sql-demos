@@ -13,6 +13,9 @@
   <artifactId>jdbc</artifactId>
 
   <properties>
+    <vertx.verticle>ServerWithJdbc</vertx.verticle>
+    <vertx.launcher>${vertx.verticle}</vertx.launcher>
+
     <slf4j.version>1.7.36</slf4j.version>
     <postgresql-jdbc.version>42.4.0</postgresql-jdbc.version>
     <agroal.version>2.0</agroal.version>
@@ -80,5 +83,15 @@
       <version>${agroal.version}</version>
     </dependency>
   </dependencies>
+
+  <build>
+    <finalName>server-with-${project.artifactId}</finalName>
+    <plugins>
+      <plugin>
+        <groupId>io.reactiverse</groupId>
+        <artifactId>vertx-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>

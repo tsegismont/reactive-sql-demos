@@ -12,6 +12,11 @@
 
   <artifactId>reactive-pg</artifactId>
 
+  <properties>
+    <vertx.verticle>ServerWithPgClient</vertx.verticle>
+    <vertx.launcher>${vertx.verticle}</vertx.launcher>
+  </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -58,5 +63,15 @@
       <artifactId>vertx-sql-client-templates</artifactId>
     </dependency>
   </dependencies>
+
+  <build>
+    <finalName>server-with-${project.artifactId}</finalName>
+    <plugins>
+      <plugin>
+        <groupId>io.reactiverse</groupId>
+        <artifactId>vertx-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>
