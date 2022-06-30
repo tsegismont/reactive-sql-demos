@@ -1,0 +1,41 @@
+= Reactive SQL Clients demos
+
+== Building
+
+[source,shell]
+----
+mvn clean package
+----
+
+== Running
+
+=== JDBC
+
+[source,shell]
+----
+cd jdbc
+java -jar target/server-with-jdbc.jar
+----
+
+=== Reactive Pg Client
+
+[source,shell]
+----
+cd reactive-pg
+java -jar target/server-with-reactive-pg.jar
+----
+
+=== Hibernate Reactive
+
+[source,shell]
+----
+cd hibernate-reactive
+java -jar target/server-with-hibernate-reactive.jar
+----
+
+== Counting Vert.x threads
+
+[source,shell]
+----
+jstack $(jps -l | grep 'server-with' | cut -d ' ' -f1) | grep 'vert' | wc -l
+----
