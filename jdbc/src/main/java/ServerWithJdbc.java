@@ -22,7 +22,7 @@ public class ServerWithJdbc extends AbstractVerticle {
 
   private static final Logger LOG = LoggerFactory.getLogger(ServerWithJdbc.class);
 
-  private JDBCPool pgPool;
+  private JDBCPool jdbcPool;
 
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
@@ -59,13 +59,13 @@ public class ServerWithJdbc extends AbstractVerticle {
 
     var poolOptions = new PoolOptions().setMaxSize(5);
 
-    pgPool = JDBCPool.pool(vertx, connectOptions, poolOptions);
+    jdbcPool = JDBCPool.pool(vertx, connectOptions, poolOptions);
   }
 
   private Future<JsonArray> listProducts(RoutingContext rc) {
     LOG.info("listProducts");
 
-    return pgPool.query("SELECT * FROM Product").execute()
+    return jdbcPool.query("SELECT * FROM Product").execute()
       .map(rowset -> {
         var products = new ArrayList<>(rowset.size());
         for (Row row : rowset) {
@@ -85,7 +85,7 @@ public class ServerWithJdbc extends AbstractVerticle {
       return Future.failedFuture(problems.toString());
     }
 
-    return pgPool.preparedQuery("INSERT INTO Product(name, price) VALUES (?, ?)")
+    return jdbcPool.preparedQuery("INSERT INTO Product(name, price) VALUES (?, ?)")
       .execute(Tuple.of(product.getName(), product.getPrice()))
       .map(rowSet -> {
         var keys = rowSet.property(JDBCPool.GENERATED_KEYS);
@@ -99,7 +99,7 @@ public class ServerWithJdbc extends AbstractVerticle {
 
     var id = Long.valueOf(rc.pathParam("id"));
 
-    return SqlTemplate.forQuery(pgPool, "SELECT * FROM Product WHERE id=#{id}")
+    return SqlTemplate.forQuery(jdbcPool, "SELECT * FROM Product WHERE id=#{id}")
       .mapTo(Product.class)
       .execute(Map.of("id", id))
       .map(rows -> {
