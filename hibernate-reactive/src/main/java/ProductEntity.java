@@ -1,9 +1,10 @@
-import io.vertx.core.json.JsonArray;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 @Entity(name = "Product")
@@ -14,9 +15,12 @@ public class ProductEntity {
   private Long id;
 
   @Column(nullable = false)
+  @NotEmpty
   private String name;
 
   @Column(nullable = false)
+  @NotNull
+  @DecimalMin("0.0")
   private BigDecimal price;
 
   public ProductEntity() {
@@ -44,17 +48,6 @@ public class ProductEntity {
 
   public void setPrice(BigDecimal price) {
     this.price = price;
-  }
-
-  public static JsonArray validate(ProductEntity product) {
-    JsonArray problems = new JsonArray();
-    if (product == null) {
-      problems.add("Product is null");
-    } else {
-      if (product.name == null || product.name.isBlank()) problems.add("Product name is missing");
-      if (product.price == null || product.price.signum() < 0) problems.add("Product must have a positive price");
-    }
-    return problems;
   }
 
   @Override

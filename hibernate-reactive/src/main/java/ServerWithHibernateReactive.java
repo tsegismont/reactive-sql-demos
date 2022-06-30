@@ -10,6 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.Persistence;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +20,14 @@ public class ServerWithHibernateReactive extends AbstractVerticle {
 
   private static final Logger LOG = LoggerFactory.getLogger(ServerWithHibernateReactive.class);
 
+  private final Validator validator;
+
   private Mutiny.SessionFactory emf;
+
+  public ServerWithHibernateReactive() {
+    ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+    validator = factory.getValidator();
+  }
 
   @Override
   public Uni<Void> asyncStart() {
@@ -73,7 +83,7 @@ public class ServerWithHibernateReactive extends AbstractVerticle {
 
     var product = rc.getBodyAsJson().mapTo(ProductEntity.class);
 
-    var problems = ProductEntity.validate(product);
+    var problems = validator.validate(product);
     if (!problems.isEmpty()) {
       return Uni.createFrom().failure(new NoStackTraceThrowable(problems.toString()));
     }

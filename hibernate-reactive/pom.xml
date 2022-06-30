@@ -18,6 +18,8 @@
 
     <hibernate-reactive.version>1.1.6.Final</hibernate-reactive.version>
     <mutiny-vertx.version>2.22.0</mutiny-vertx.version>
+    <hibernate-validator.version>6.2.3.Final</hibernate-validator.version>
+    <jakarta.el.version>3.0.3</jakarta.el.version>
   </properties>
 
   <dependencyManagement>
@@ -66,6 +68,16 @@
       <groupId>com.ongres.scram</groupId>
       <artifactId>client</artifactId>
       <version>2.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate.validator</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <version>${hibernate-validator.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish</groupId>
+      <artifactId>jakarta.el</artifactId>
+      <version>${jakarta.el.version}</version>
     </dependency>
   </dependencies>
 
