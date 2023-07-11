@@ -8,13 +8,14 @@ import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.ErrorHandler;
 import io.vertx.pgclient.PgConnectOptions;
 import io.vertx.pgclient.PgPool;
-import io.vertx.sqlclient.PoolOptions;
-import io.vertx.sqlclient.Tuple;
+import io.vertx.sqlclient.*;
 import io.vertx.sqlclient.templates.SqlTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 public class ServerWithPgClient extends AbstractVerticle {
 
@@ -65,11 +66,15 @@ public class ServerWithPgClient extends AbstractVerticle {
   private Future<JsonArray> listProducts(RoutingContext rc) {
     LOG.info("listProducts");
 
-    return pgPool.query("SELECT JSON_AGG(p) FROM Product p").execute()
-      .map(rowset -> {
-        var products = rowset.iterator().next().getJsonArray(0);
-        return products != null ? products : new JsonArray();
-      });
+    Collector<Row,?, JsonArray> collector = Collectors.mapping(
+      Row::toJson,
+      Collectors.collectingAndThen(Collectors.toList(), JsonArray::new)
+    );
+
+    return pgPool.query("SELECT JSON_AGG(p) FROM Product p")
+      .collecting(collector)
+      .execute()
+      .map(SqlResult::value);
   }
 
   private Future<Product> createProduct(RoutingContext rc) {
